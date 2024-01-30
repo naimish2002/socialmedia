@@ -23,6 +23,9 @@ async function Page({params} : {params: {id: string}}) {
             username={userInfo.username}
             imgUrl={userInfo.image}
             bio={userInfo.bio}
+            totalMembers={userInfo?.followers?.length}
+            totalThreads={userInfo?.threads.length}
+            type='User'
             />
 
             <div className='mt-5'>

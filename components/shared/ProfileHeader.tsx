@@ -8,6 +8,9 @@ interface Props {
   username: string;
   imgUrl: string;
   bio: string;
+  totalMembers: number;
+  totalThreads: number;
+  type?: 'User' | 'Community';
 }
 
 const ProfileHeader = ({
@@ -17,6 +20,9 @@ const ProfileHeader = ({
   username,
   imgUrl,
   bio,
+  totalMembers,
+  totalThreads,
+  type
 }: Props) => {
   return (
     <div className='flex w-full flex-col justify-start'>
@@ -51,10 +57,10 @@ const ProfileHeader = ({
 
       <div className='flex items-center gap-5 mt-5'>
         <p className='text-base-regular text-gray-1'>
-          <span className='profile-follower-count'>0</span> Followers
+          <span className='profile-follower-count'>{totalMembers}</span> {type === 'Community' ? 'Members' : 'Followers'}
         </p>
-        <p className='text-base-medium text-gray-1'>
-          <span className='profile-thread-count'>0</span> Threads
+        <p className='text-base-regular text-gray-1'>
+          <span className='profile-thread-count'>{totalThreads}</span> Threads
         </p>
       </div>
 

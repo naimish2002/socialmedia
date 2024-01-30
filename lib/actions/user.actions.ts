@@ -5,6 +5,7 @@ import User from '../models/user.model';
 import { connectToDB } from '../mongoose';
 import Thread from '../models/thread.model';
 import { FilterQuery, SortOrder } from 'mongoose';
+import Community from '../models/community.model';
 
 interface Params {
   userId: string;
@@ -50,11 +51,10 @@ export async function fetchUser(userId: string) {
   try {
     connectToDB();
 
-    return await User.findOne({ id: userId });
-    // .populate({
-    //     path: 'communities',
-    //     model: 'Community',
-    // })
+    return await User.findOne({ id: userId }).populate({
+      path: 'communities',
+      model: Community,
+    });
   } catch (error: any) {
     throw new Error(`Failed to fetch user: ${error.message}`);
   }
@@ -69,15 +69,22 @@ export async function fetchUserThreads(userId: string) {
     const threads = await User.findOne({ id: userId }).populate({
       path: 'threads',
       model: Thread,
-      populate: {
-        path: 'children',
-        model: Thread,
-        populate: {
-          path: 'author',
-          model: User,
-          select: 'id name image',
+      populate: [
+        {
+          path: 'children',
+          model: Thread,
+          populate: {
+            path: 'author',
+            model: User,
+            select: 'id name image',
+          },
         },
-      },
+        {
+          path: 'community',
+          model: Community,
+          select: '_id id name image',
+        },
+      ],
     });
 
     return threads;
@@ -124,10 +131,12 @@ export async function fetchUsers({
       .skip(skips)
       .limit(pageSize);
 
+    // Count the total number of users that match the search criteria (without pagination).
     const totalUsersCount = await User.countDocuments(query);
 
     const users = await usersQuery.exec();
 
+    // Check if there are more users beyond the current page.
     const isNext = totalUsersCount > skips + users.length;
 
     return { users, isNext };
@@ -155,7 +164,7 @@ export async function getNotifications(userId: string) {
       path: 'author',
       model: User,
       select: '_id id username name image',
-    })
+    });
 
     return replies;
   } catch (error: any) {
